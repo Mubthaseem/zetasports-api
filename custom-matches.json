@@ -1,16 +1,16 @@
 [
   {
-    "id": "custom-3",
-    "team1Name": "Mexico",
-    "team1Logo": "https://images.fotmob.com/image_resources/logo/teamlogo/6710_small.png",
-    "team2Name": "South Africa",
-    "team2Logo": "https://images.fotmob.com/image_resources/logo/teamlogo/6316_small.png",
-    "startTime": "2026-06-12T00:30",
-    "endTime": "2026-06-12T02:30",
-    "timezone": "IST",
-    "url": "https://live.jobssearch360.in/p/live-matches.html",
-    "round": "World Cup",
-    "platform": "HELLOSPORTS",
-    "league": "World Cup"
+    "id": "custom-1781905836374",
+    "team1Name": "Scotland",
+    "team1Logo": "https://images.fotmob.com/image_resources/logo/teamlogo/8498_small.png",
+    "team2Name": "Morocco",
+    "team2Logo": "https://images.fotmob.com/image_resources/logo/teamlogo/6262_small.png",
+    "startTime": "2026-06-19T04:30:00.000Z",
+    "endTime": "2026-06-19T06:30:00.000Z",
+    "league": "FIFA World Cup",
+    "round": "Round 2",
+    "url": "https://zeta.scoopnonstop.com/2026/06/scotland-vs-morocco.html",
+    "platform": "LIVE",
+    "timezone": "UTC"
   }
 ]
