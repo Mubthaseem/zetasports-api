@@ -1,0 +1,101 @@
+name: Fetch Live Match Data (30s)
+
+# GitHub Actions minimum schedule = every 5 minutes.
+# TRICK: We loop INSIDE the job — fetch every 30s × 10 iterations = 5 minutes.
+# This gives effective 30-second live data updates for free.
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+jobs:
+  fetch-and-cache:
+    runs-on: ubuntu-latest
+    # Allow up to 10 minutes so the loop completes fully
+    timeout-minutes: 10
+
+    steps:
+      # ── 1. Checkout repo ────────────────────────────────────
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      # ── 2. Configure git once ────────────────────────────────
+      - name: Configure git
+        run: |
+          git config user.name  "ZetaSports Bot"
+          git config user.email "bot@zetasports.online"
+
+      # ── 3. Loop every 30s × 10 = 5 minutes ──────────────────
+      # Each iteration: fetch → stamp timestamp → commit if changed → sleep 30s
+      - name: Poll techo.sbs every 30 seconds (10 rounds)
+        run: |
+          ROUNDS=10
+          INTERVAL=30
+
+          for i in $(seq 1 $ROUNDS); do
+            echo ""
+            echo "===== Round $i / $ROUNDS  ($(date -u '+%H:%M:%S UTC')) ====="
+
+            # ── Fetch live data (server-side = no Referer/Origin blocked) ──
+            HTTP_STATUS=$(curl -s -o live-feed.json -w "%{http_code}" \
+              --max-time 10 \
+              -H "Accept: application/json" \
+              -H "User-Agent: Mozilla/5.0 (compatible; ZetaSports/1.0)" \
+              "https://app.techo.sbs/?_t=$(date +%s)")
+
+            echo "HTTP $HTTP_STATUS"
+
+            if [ "$HTTP_STATUS" = "200" ]; then
+              # Inject fetch metadata so the widget can show data freshness
+              python3 - <<'PYEOF'
+import json, datetime, sys
+
+with open('live-feed.json', 'r') as f:
+    data = json.load(f)
+
+data['_proxy_status'] = 'fresh'
+data['_fetched_at']   = datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
+
+with open('live-feed.json', 'w') as f:
+    json.dump(data, f, separators=(',', ':'))   # compact — faster to serve
+
+print("Stamped _fetched_at:", data['_fetched_at'])
+PYEOF
+            else
+              echo "Fetch failed (HTTP $HTTP_STATUS) — keeping previous data, marking stale"
+              python3 - <<'PYEOF'
+import json, datetime
+
+try:
+    with open('live-feed.json', 'r') as f:
+        data = json.load(f)
+    data['_proxy_status'] = 'stale'
+    data['_fetched_at']   = datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
+    with open('live-feed.json', 'w') as f:
+        json.dump(data, f, separators=(',', ':'))
+except Exception as e:
+    print("Could not update stale flag:", e)
+PYEOF
+            fi
+
+            # ── Commit only if content changed ──────────────────
+            git add live-feed.json
+            if git diff --cached --quiet; then
+              echo "No change — skipping commit"
+            else
+              git commit -m "live: update feed [skip ci] $(date -u '+%H:%M:%S')"
+              git push
+              echo "Pushed!"
+            fi
+
+            # ── Sleep 30s (skip sleep on last iteration) ─────────
+            if [ "$i" -lt "$ROUNDS" ]; then
+              echo "Sleeping ${INTERVAL}s..."
+              sleep $INTERVAL
+            fi
+          done
+
+          echo ""
+          echo "All $ROUNDS rounds complete."
