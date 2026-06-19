@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ZETA Sports — GitHub Admin Panel</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;700;800;900&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg-main: #060913;
+      --bg-card: #0d1222;
+      --bg-card-hover: #141b30;
+      --bg-glass: rgba(13, 18, 34, 0.75);
+      --border-glass: rgba(255, 255, 255, 0.08);
+      --accent-blue: #3b82f6;
+      --accent-neon: #10b981;
+      --accent-red: #ef4444;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --shadow-accent: 0 0 25px rgba(59, 130, 246, 0.25);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { width: 100%; min-height: 100vh; background: var(--bg-main); color: var(--text-main); font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
+    a { color: inherit; text-decoration: none; }
+    button, input, select, textarea { font-family: inherit; background: none; border: none; outline: none; color: inherit; }
+
+    .app-container {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      min-height: 100vh;
+    }
+
+    /* ── Sidebar ── */
+    aside.sidebar {
+      background: var(--bg-card);
+      border-right: 1px solid var(--border-glass);
+      padding: 30px 24px;
+      display: flex;
+      flex-direction: column;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+    }
+    .logo {
+      font-family: 'Outfit', sans-serif;
+      font-size: 24px;
+      font-weight: 900;
+      margin-bottom: 30px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .logo span {
+      color: var(--accent-blue);
+    }
+    .nav-menu {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex: 1;
+    }
+    .nav-item {
+      width: 100%;
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--text-muted);
+      transition: all 0.25s;
+    }
+    .nav-item:hover {
+      color: #fff;
+      background: rgba(255,255,255,0.03);
+    }
+    .nav-item.active {
+      background: rgba(59, 130, 246, 0.12);
+      color: var(--accent-blue);
+      border-left: 4px solid var(--accent-blue);
+      border-radius: 0 12px 12px 0;
+      padding-left: 12px;
+    }
+
+    /* ── Main Content ── */
+    main.content {
+      padding: 40px;
+      overflow-y: auto;
+    }
+
+    .pane { display: none; }
+    .pane.active { display: block; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+    .pane-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      border-bottom: 1px solid var(--border-glass);
+      padding-bottom: 16px;
+    }
+    .pane-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 28px;
+      font-weight: 800;
+    }
+
+    /* ── Forms and Inputs ── */
+    .card {
+      background: var(--bg-glass);
+      border: 1px solid var(--border-glass);
+      border-radius: 20px;
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .form-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+    }
+    .form-input {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-glass);
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-size: 14px;
+      transition: all 0.3s;
+      color: var(--text-main);
+    }
+    .form-input:focus {
+      border-color: var(--accent-blue);
+      background: rgba(255, 255, 255, 0.07);
+      box-shadow: 0 0 10px rgba(59, 130, 246, 0.15);
+    }
+
+    /* Buttons */
+    .btn {
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.25s;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent-blue) 0%, #1e40af 100%);
+      color: #fff;
+      box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+    }
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(59, 130, 246, 0.45);
+    }
+    .btn-secondary {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border-glass);
+      color: var(--text-main);
+    }
+    .btn-secondary:hover {
+      background: rgba(255,255,255,0.09);
+    }
+    .btn-danger {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      color: var(--accent-red);
+    }
+    .btn-danger:hover {
+      background: var(--accent-red);
+      color: #fff;
+    }
+    .btn-success {
+      background: linear-gradient(135deg, var(--accent-neon) 0%, #065f46 100%);
+      color: #fff;
+      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+    }
+    .btn-success:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.45);
+    }
+
+    /* Table styles */
+    .table-container {
+      border: 1px solid var(--border-glass);
+      border-radius: 16px;
+      overflow: hidden;
+      margin-top: 16px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+    thead th {
+      background: rgba(0, 0, 0, 0.3);
+      color: var(--text-muted);
+      font-weight: 700;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 14px 20px;
+      text-align: left;
+    }
+    tbody td {
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border-glass);
+      color: #e2e8f0;
+      vertical-align: middle;
+    }
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+    tbody tr:hover td {
+      background: rgba(255,255,255,0.01);
+    }
+
+    /* Badges */
+    .badge {
+      padding: 4px 8px;
+      font-size: 11px;
+      font-weight: 700;
+      border-radius: 6px;
+      display: inline-block;
+    }
+    .badge-blue { background: rgba(59, 130, 246, 0.15); color: var(--accent-blue); }
+    .badge-neon { background: rgba(16, 185, 129, 0.15); color: var(--accent-neon); }
+
+    /* Alert Boxes */
+    .alert-box {
+      padding: 16px;
+      border-radius: 12px;
+      font-size: 14px;
+      margin-bottom: 20px;
+      display: none;
+    }
+    .alert-success { background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); color: var(--accent-neon); }
+    .alert-error { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); color: var(--accent-red); }
+
+    .help-text {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 4px;
+      line-height: 1.4;
+    }
+
+    /* ── Live Matches Selector styles ── */
+    .live-selector-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-top: 15px;
+      max-height: 450px;
+      overflow-y: auto;
+      padding-right: 8px;
+    }
+    .live-selector-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-glass);
+      border-radius: 12px;
+      padding: 14px 18px;
+      display: grid;
+      grid-template-columns: 50px 2fr 3fr;
+      align-items: center;
+      gap: 16px;
+      transition: all 0.3s;
+    }
+    .live-selector-card:hover {
+      background: rgba(255, 255, 255, 0.04);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+    .live-selector-checkbox {
+      width: 22px;
+      height: 22px;
+      cursor: pointer;
+      accent-color: var(--accent-blue);
+    }
+    .live-selector-teams {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .live-selector-team-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .live-selector-team-logo {
+      width: 22px;
+      height: 22px;
+      object-fit: contain;
+    }
+    .live-selector-time {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+    .live-selector-input-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="logo">🏆 ZETA<span>SPORTS</span></div>
+      <nav class="nav-menu">
+        <button class="nav-item active" data-pane="pane-config">⚙️ Credentials</button>
+        <button class="nav-item" data-pane="pane-selected">📌 selected-matches.json</button>
+        <button class="nav-item" data-pane="pane-custom">⚽ custom-matches.json</button>
+        <button class="nav-item" data-pane="pane-redirects">🔄 redirects.json</button>
+      </nav>
+      <div class="help-text" style="border-top:1px solid var(--border-glass); padding-top:15px; margin-top:20px;">
+        ZetaSports Admin Portal 1.0.0
+      </div>
+    </aside>
+
+    <!-- Main Content Panes -->
+    <main class="content">
+
+      <!-- ALERT MESSAGES -->
+      <div class="alert-box alert-success" id="alert-success">Successfully uploaded content to GitHub!</div>
+      <div class="alert-box alert-error" id="alert-error">Failed to perform action. Please verify credentials.</div>
+
+      <!-- CREDENTIALS PANE -->
+      <div class="pane active" id="pane-config">
+        <div class="pane-header">
+          <h2 class="pane-title">GitHub Config &amp; Access</h2>
+        </div>
+        <div class="card">
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">GitHub Username</label>
+              <input class="form-input" id="gh-owner" placeholder="e.g. Mubthaseem"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Repository Name</label>
+              <input class="form-input" id="gh-repo" placeholder="e.g. zetasports-api"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">GitHub Access Token (PAT)</label>
+              <input class="form-input" id="gh-token" type="password" placeholder="ghp_xxxxxxxxxxxxxxxxxxxxxxxxxx"/>
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="saveCredentials()">💾 Save Config</button>
+        </div>
+
+        <div class="card" style="border-left: 4px solid var(--accent-blue);">
+          <h3 style="font-family:'Outfit'; margin-bottom:12px;">How to get your GitHub Token:</h3>
+          <p class="help-text" style="font-size:14px; margin-bottom:10px;">To push files directly to GitHub from this panel, you need a Personal Access Token:</p>
+          <ol class="help-text" style="font-size:13px; padding-left:20px; display:flex; flex-direction:column; gap:8px;">
+            <li>Go to your **GitHub Settings > Developer Settings > Personal Access Tokens > Tokens (classic)**.</li>
+            <li>Click **Generate new token (classic)**.</li>
+            <li>Select the **"repo"** scope checkbox (this permits writing to files).</li>
+            <li>Click **Generate Token** and copy the code. Paste it here and click **Save Config**.</li>
+          </ol>
+        </div>
+      </div>
+
+      <!-- SELECTED MATCHES PANE -->
+      <div class="pane" id="pane-selected">
+        <div class="pane-header">
+          <h2 class="pane-title">Selected Matches Selector (Football &amp; Cricket)</h2>
+          <button class="btn btn-success" onclick="pushSelectedMatches()">🚀 Push Selected &amp; Cricket to GitHub</button>
+        </div>
+
+        <div class="card">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+            <h4>Select Active Matches from Live Feed (https://app.techo.sbs/)</h4>
+            <button class="btn btn-secondary" style="padding:6px 12px; font-size:12px;" onclick="loadLiveFeed()">🔄 Refresh Feed</button>
+          </div>
+          <div id="live-feed-loader" style="color:var(--text-muted); font-size:13px; display:none; margin-bottom: 12px;">Fetching live feed...</div>
+          <div class="live-selector-grid" id="live-matches-selector">
+            <div style="color:var(--text-muted); font-size:13px; text-align:center; padding:20px;">Click 'Refresh Feed' or make sure credentials are loaded to populate match selection.</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h4>Selected Football Match IDs (selected-matches.json)</h4>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Match ID</th>
+                  <th>Teams</th>
+                  <th>Stream URL Override</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="selected-matches-table">
+                <tr><td colspan="4" class="empty-row">No matches selected. Check them in the list above!</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card">
+          <h4>Selected Cricket Match IDs (selected-cricket-matches.json)</h4>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Match ID</th>
+                  <th>Teams</th>
+                  <th>Stream URL Override</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="selected-cricket-matches-table">
+                <tr><td colspan="4" class="empty-row">No cricket matches selected. Check them in the list above!</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- CUSTOM MATCHES PANE -->
+      <div class="pane" id="pane-custom">
+        <div class="pane-header">
+          <h2 class="pane-title">custom-matches.json</h2>
+          <button class="btn btn-success" onclick="pushFile('custom-matches.json')">🚀 Push to GitHub</button>
+        </div>
+        <div class="card">
+          <h4>Add/Edit Custom Stream Match</h4>
+          <div class="form-grid" style="margin-top:15px;">
+            <div class="form-group">
+              <label class="form-label">Team 1 Name</label>
+              <input class="form-input" id="cus-t1-name" placeholder="e.g. Brazil"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Team 1 Logo URL</label>
+              <input class="form-input" id="cus-t1-logo" placeholder="https://domain.com/brazil.png"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Team 2 Name</label>
+              <input class="form-input" id="cus-t2-name" placeholder="e.g. Haiti"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Team 2 Logo URL</label>
+              <input class="form-input" id="cus-t2-logo" placeholder="https://domain.com/haiti.png"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">League / Tournament</label>
+              <input class="form-input" id="cus-league" placeholder="e.g. FIFA World Cup"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Round / Subtitle</label>
+              <input class="form-input" id="cus-round" placeholder="e.g. Group C"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Start Time (UTC / ISO Format)</label>
+              <input class="form-input" id="cus-time" type="datetime-local"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Stream URL</label>
+              <input class="form-input" id="cus-stream" placeholder="https://domain.com/stream.m3u8"/>
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="addCustomMatch()">➕ Add Custom Match</button>
+        </div>
+
+        <div class="card">
+          <h4>Custom Match List</h4>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Teams</th>
+                  <th>Tournament</th>
+                  <th>Kickoff Time</th>
+                  <th>Stream URL</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="custom-matches-table">
+                <tr><td colspan="5" class="empty-row">No custom matches added yet.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- REDIRECTS PANE -->
+      <div class="pane" id="pane-redirects">
+        <div class="pane-header">
+          <h2 class="pane-title">redirects.json</h2>
+          <button class="btn btn-success" onclick="pushFile('redirects.json')">🚀 Push to GitHub</button>
+        </div>
+        <div class="card">
+          <h4>Add Redirect Mapping</h4>
+          <div class="form-grid" style="margin-top:15px;">
+            <div class="form-group">
+              <label class="form-label">Match ID (Key)</label>
+              <input class="form-input" id="red-id" placeholder="e.g. 760435"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Destination URL</label>
+              <input class="form-input" id="red-url" placeholder="e.g. https://schkjvc.blogspot.com/p/live.html?id=760435"/>
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="addRedirect()">➕ Add Mapping</button>
+        </div>
+
+        <div class="card">
+          <h4>Redirection Rules</h4>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Match ID</th>
+                  <th>Destination Redirect URL</th>
+                  <th>Action</th>
+                </tr>
+    </main>
+  </div>
+
+  <script>
+    // Local State Storage
+    let selectedMatchesList = [];
+    let selectedCricketMatchesList = [];
+    let customMatchesList = [];
+    let redirectsMap = {};
+    let liveFeedMatches = [];
+
+    // ── Load Credentials & Config ──
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('gh-owner').value = localStorage.getItem('gh_owner') || '';
+      document.getElementById('gh-repo').value = localStorage.getItem('gh_repo') || '';
+      document.getElementById('gh-token').value = localStorage.getItem('gh_token') || '';
+
+      // Initialize Menu navigation
+      const navItems = document.querySelectorAll('.nav-item');
+      navItems.forEach(item => {
+        item.addEventListener('click', function() {
+          navItems.forEach(n => n.classList.remove('active'));
+          this.classList.add('active');
+
+          const targetPane = this.dataset.pane;
+          document.querySelectorAll('.pane').forEach(p => p.classList.remove('active'));
+          document.getElementById(targetPane).classList.add('active');
+
+          // Pull fresh file content from GitHub when switching tabs
+          if (targetPane === 'pane-selected') {
+            fetchSelectedFiles();
+          }
+          if (targetPane === 'pane-custom') fetchFileFromGitHub('custom-matches.json');
+          if (targetPane === 'pane-redirects') fetchFileFromGitHub('redirects.json');
+        });
+      });
+    });
+
+    function saveCredentials() {
+      localStorage.setItem('gh_owner', document.getElementById('gh-owner').value.trim());
+      localStorage.setItem('gh_repo', document.getElementById('gh-repo').value.trim());
+      localStorage.setItem('gh_token', document.getElementById('gh-token').value.trim());
+      showNotification('success', 'Credentials saved locally!');
+    }
+
+    function getGHConfig() {
+      return {
+        owner: localStorage.getItem('gh_owner'),
+        repo: localStorage.getItem('gh_repo'),
+        token: localStorage.getItem('gh_token')
+      };
+    }
+
+    // Fetch both Selected files
+    async function fetchSelectedFiles() {
+      await Promise.all([
+        fetchFileFromGitHub('selected-matches.json'),
+        fetchFileFromGitHub('selected-cricket-matches.json')
+      ]);
+      await loadLiveFeed();
+    }
+
+    // ── Fetch Files From GitHub (Sync State) ──
+    async function fetchFileFromGitHub(filename) {
+      const config = getGHConfig();
+      if (!config.owner || !config.repo || !config.token) {
+        showNotification('error', 'Please configure your GitHub credentials first.');
+        return;
+      }
+
+      const url = `https://api.github.com/repos/${config.owner}/${config.repo}/contents/${filename}`;
+      try {
+        const response = await fetch(url, {
+          headers: { "Authorization": `token ${config.token}` }
+        });
+        
+        if (response.ok) {
+          const fileData = await response.json();
+          localStorage.setItem(`sha_${filename}`, fileData.sha);
+          const rawContent = decodeURIComponent(escape(atob(fileData.content)));
+          const parsed = JSON.parse(rawContent);
+
+          if (filename === 'selected-matches.json') {
+            selectedMatchesList = Array.isArray(parsed) ? parsed : (parsed.matches || []);
+            renderSelectedMatches();
+          } else if (filename === 'selected-cricket-matches.json') {
+            selectedCricketMatchesList = Array.isArray(parsed) ? parsed : (parsed.matches || []);
+            renderSelectedCricketMatches();
+          } else if (filename === 'custom-matches.json') {
+            customMatchesList = parsed;
+            renderCustomMatches();
+          } else if (filename === 'redirects.json') {
+            redirectsMap = parsed;
+            renderRedirects();
+          }
+          console.log(`Fetched and synced ${filename} successfully.`);
+        } else if (response.status === 404) {
+          console.log(`${filename} does not exist yet. It will be created on push.`);
+          if (filename === 'selected-matches.json') {
+            selectedMatchesList = [];
+            renderSelectedMatches();
+          } else if (filename === 'selected-cricket-matches.json') {
+            selectedCricketMatchesList = [];
+            renderSelectedCricketMatches();
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching file:', err.message);
+      }
+    }
+
+    // ── Fetch Matches from API ──
+    async function loadLiveFeed() {
+      const loader = document.getElementById('live-feed-loader');
+      const container = document.getElementById('live-matches-selector');
+      loader.style.display = 'block';
+
+      try {
+        const response = await fetch('https://app.techo.sbs/?_t=' + Date.now());
+        if (!response.ok) throw new Error('API down');
+        const data = await response.json();
+        
+        if (data.success && data.matches) {
+          liveFeedMatches = data.matches;
+          renderLiveMatchesSelector();
+        } else {
+          container.innerHTML = '<div style="color:red; text-align:center; padding:10px;">Failed to parse matches from API</div>';
+        }
+      } catch (e) {
+        container.innerHTML = '<div style="color:red; text-align:center; padding:10px;">Error loading live feed API</div>';
+      } finally {
+        loader.style.display = 'none';
+      }
+    }
+
+    // Render Selector Card Grid
+    function renderLiveMatchesSelector() {
+      const container = document.getElementById('live-matches-selector');
+      if (liveFeedMatches.length === 0) {
+        container.innerHTML = '<div style="color:var(--text-muted); text-align:center; padding:20px;">No live or upcoming matches in the feed.</div>';
+        return;
+      }
+
+      container.innerHTML = liveFeedMatches.map(match => {
+        const isCricket = match.sport === 'cricket';
+        const targetList = isCricket ? selectedCricketMatchesList : selectedMatchesList;
+        
+        // Check if selected
+        const existing = targetList.find(item => {
+          const itemId = typeof item === 'object' ? item.id : item;
+          return String(itemId) === String(match.id);
+        });
+        
+        const isChecked = !!existing;
+        const streamUrl = (existing && typeof existing === 'object') ? (existing.streamUrl || '') : '';
+        const flagFallback = 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2222%22 height=%2222%22><circle cx=%2211%22 cy=%2211%22 r=%2210%22 fill=%22%23252D3F%22/></svg>';
+
+        return `
+          <div class="live-selector-card" id="card-${match.id}">
+            <div>
+              <input type="checkbox" class="live-selector-checkbox" id="chk-${match.id}" ${isChecked ? 'checked' : ''} onchange="toggleMatchSelection(${match.id}, '${match.sport}')"/>
+            </div>
+            <div class="live-selector-teams">
+              <div class="live-selector-team-row">
+                <img class="live-selector-team-logo" src="${match.homeLogo || ''}" onerror="this.onerror=null;this.src='${flagFallback}';">
+                <span>${match.home}</span>
+              </div>
+              <div class="live-selector-team-row">
+                <img class="live-selector-team-logo" src="${match.awayLogo || ''}" onerror="this.onerror=null;this.src='${flagFallback}';">
+                <span>${match.away}</span>
+              </div>
+              <div class="live-selector-time">${isCricket ? '🏏 Cricket' : '⚽ Football'} • ${new Date(match.utcDate).toLocaleString()}</div>
+            </div>
+            <div class="live-selector-input-container">
+              <label class="form-label" style="font-size:10px;">Stream URL Override</label>
+              <input class="form-input" style="padding: 6px 12px; font-size:12px;" id="override-${match.id}" placeholder="Redirect Link (optional)" value="${streamUrl}" oninput="updateStreamOverride(${match.id}, '${match.sport}')"/>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Toggle Checkbox state
+    function toggleMatchSelection(id, sport) {
+      const isCricket = sport === 'cricket';
+      const targetList = isCricket ? selectedCricketMatchesList : selectedMatchesList;
+      const isChecked = document.getElementById(`chk-${id}`).checked;
+      const overrideVal = document.getElementById(`override-${id}`).value.trim();
+
+      const existingIndex = targetList.findIndex(item => {
+        const itemId = typeof item === 'object' ? item.id : item;
+        return String(itemId) === String(id);
+      });
+
+      if (isChecked) {
+        if (existingIndex === -1) {
+          const newItem = overrideVal ? { id: parseInt(id), streamUrl: overrideVal } : parseInt(id);
+          targetList.push(newItem);
+        }
+      } else {
+        if (existingIndex !== -1) {
+          targetList.splice(existingIndex, 1);
+        }
+      }
+
+      if (isCricket) {
+        renderSelectedCricketMatches();
+      } else {
+        renderSelectedMatches();
+      }
+    }
+
+    // Update stream url override input value
+    function updateStreamOverride(id, sport) {
+      const isCricket = sport === 'cricket';
+      const targetList = isCricket ? selectedCricketMatchesList : selectedMatchesList;
+      const overrideVal = document.getElementById(`override-${id}`).value.trim();
+      const checkbox = document.getElementById(`chk-${id}`);
+
+      // Auto-check the box if they type a URL
+      if (overrideVal && !checkbox.checked) {
+        checkbox.checked = true;
+      }
+
+      const existingIndex = targetList.findIndex(item => {
+        const itemId = typeof item === 'object' ? item.id : item;
+        return String(itemId) === String(id);
+      });
+
+      if (checkbox.checked) {
+        const newItem = overrideVal ? { id: parseInt(id), streamUrl: overrideVal } : parseInt(id);
+        if (existingIndex !== -1) {
+          targetList[existingIndex] = newItem;
+        } else {
+          targetList.push(newItem);
+        }
+      } else {
+        if (existingIndex !== -1) {
+          targetList.splice(existingIndex, 1);
+        }
+      }
+
+      if (isCricket) {
+        renderSelectedCricketMatches();
+      } else {
+        renderSelectedMatches();
+      }
+    }
+
+    // ── Table Rendering Functions ──
+    function renderSelectedMatches() {
+      const tbody = document.getElementById('selected-matches-table');
+      if (selectedMatchesList.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="empty-row">No matches selected. Check them in the list above!</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = selectedMatchesList.map((item, idx) => {
+        const id = typeof item === 'object' ? item.id : item;
+        const streamUrl = typeof item === 'object' ? (item.streamUrl || 'None') : 'None';
+        
+        // Find team names from live feed if possible
+        const matchData = liveFeedMatches.find(m => String(m.id) === String(id));
+        const teamsName = matchData ? `${matchData.home} vs ${matchData.away}` : 'Loading...';
+
+        return `
+          <tr>
+            <td><strong>${id}</strong></td>
+            <td>${teamsName}</td>
+            <td><code style="word-break:break-all;">${streamUrl}</code></td>
+            <td><button class="btn btn-danger" style="padding:6px 12px; font-size:12px;" onclick="deleteSelectedMatch(${idx}, false)">🗑️ Delete</button></td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function renderSelectedCricketMatches() {
+      const tbody = document.getElementById('selected-cricket-matches-table');
+      if (selectedCricketMatchesList.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="empty-row">No cricket matches selected. Check them in the list above!</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = selectedCricketMatchesList.map((item, idx) => {
+        const id = typeof item === 'object' ? item.id : item;
+        const streamUrl = typeof item === 'object' ? (item.streamUrl || 'None') : 'None';
+        
+        const matchData = liveFeedMatches.find(m => String(m.id) === String(id));
+        const teamsName = matchData ? `${matchData.home} vs ${matchData.away}` : 'Loading...';
+
+        return `
+          <tr>
+            <td><strong>${id}</strong></td>
+            <td>${teamsName}</td>
+            <td><code style="word-break:break-all;">${streamUrl}</code></td>
+            <td><button class="btn btn-danger" style="padding:6px 12px; font-size:12px;" onclick="deleteSelectedMatch(${idx}, true)">🗑️ Delete</button></td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function deleteSelectedMatch(idx, isCricket) {
+      const targetList = isCricket ? selectedCricketMatchesList : selectedMatchesList;
+      const removedItem = targetList[idx];
+      const removedId = typeof removedItem === 'object' ? removedItem.id : removedItem;
+
+      targetList.splice(idx, 1);
+
+      // Uncheck from checkbox list if currently loaded
+      const chk = document.getElementById(`chk-${removedId}`);
+      if (chk) chk.checked = false;
+      const overrideInput = document.getElementById(`override-${removedId}`);
+      if (overrideInput) overrideInput.value = '';
+
+      if (isCricket) {
+        renderSelectedCricketMatches();
+      } else {
+        renderSelectedMatches();
+      }
+    }
+
+    function renderCustomMatches() {
+      const tbody = document.getElementById('custom-matches-table');
+      if (customMatchesList.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="empty-row">No custom matches added. Add one above!</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = customMatchesList.map((m, idx) => {
+        const localTime = new Date(m.startTime).toLocaleString();
+        return `
+          <tr>
+            <td>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <img src="${m.team1Logo}" style="width:20px;height:20px;object-fit:contain;"/> 
+                <span>${m.team1Name} vs ${m.team2Name}</span>
+                <img src="${m.team2Logo}" style="width:20px;height:20px;object-fit:contain;"/>
+              </div>
+            </td>
+            <td><span class="badge badge-blue">${m.league} (${m.round})</span></td>
+            <td><span style="font-size:12px;color:var(--text-muted);">${localTime}</span></td>
+            <td><code style="word-break:break-all;font-size:12px;">${m.url || 'None'}</code></td>
+            <td><button class="btn btn-danger" style="padding:6px 12px; font-size:12px;" onclick="deleteCustomMatch(${idx})">🗑️ Delete</button></td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function renderRedirects() {
+      const tbody = document.getElementById('redirects-table');
+      const keys = Object.keys(redirectsMap);
+      if (keys.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="3" class="empty-row">No redirect rules found. Add one above!</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = keys.map(key => {
+        return `
+          <tr>
+            <td><strong>${key}</strong></td>
+            <td><code style="word-break:break-all;color:var(--accent-neon);">${redirectsMap[key]}</code></td>
+            <td><button class="btn btn-danger" style="padding:6px 12px; font-size:12px;" onclick="deleteRedirect('${key}')">🗑️ Delete</button></td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // Push Selected Matches & Selected Cricket Matches to GitHub
+    async function pushSelectedMatches() {
+      showNotification('success', 'Pushing selected matches configurations...');
+      try {
+        await Promise.all([
+          pushFile('selected-matches.json', { matches: selectedMatchesList }),
+          pushFile('selected-cricket-matches.json', { matches: selectedCricketMatchesList })
+        ]);
+        showNotification('success', 'Successfully pushed all selected matches to GitHub!');
+      } catch (e) {
+        showNotification('error', 'Pushing selected files failed: ' + e.message);
+      }
+    }
+
+    // ── Push / Commit to GitHub ──
+    async function pushFile(filename, customData = null) {
+      const config = getGHConfig();
+      if (!config.owner || !config.repo || !config.token) {
+        showNotification('error', 'Configure credentials before pushing!');
+        return;
+      }
+
+      let dataToPush = customData;
+      if (!dataToPush) {
+        if (filename === 'selected-matches.json') {
+          dataToPush = { matches: selectedMatchesList };
+        } else if (filename === 'selected-cricket-matches.json') {
+          dataToPush = { matches: selectedCricketMatchesList };
+        } else if (filename === 'custom-matches.json') {
+          dataToPush = customMatchesList;
+        } else if (filename === 'redirects.json') {
+          dataToPush = redirectsMap;
+        }
+      }
+
+      const url = `https://api.github.com/repos/${config.owner}/${config.repo}/contents/${filename}`;
+      const sha = localStorage.getItem(`sha_${filename}`) || null;
+
+      const body = {
+        message: `Admin Panel: Update ${filename}`,
+        content: btoa(unescape(encodeURIComponent(JSON.stringify(dataToPush, null, 2)))),
+      };
+      if (sha) body.sha = sha;
+
+      try {
+        const response = await fetch(url, {
+          method: 'PUT',
+          headers: {
+            "Authorization": `token ${config.token}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(body)
+        });
+
+        if (response.ok) {
+          const resJson = await response.json();
+          localStorage.setItem(`sha_${filename}`, resJson.content.sha);
+          if (!customData) {
+            showNotification('success', `Successfully pushed ${filename} to GitHub!`);
+          }
+        } else {
+          const errData = await response.json();
+          showNotification('error', `GitHub Error: ${errData.message}`);
+        }
+      } catch (err) {
+        showNotification('error', `Request failed: ${err.message}`);
+      }
+    }
+
+    function addCustomMatch() {
+      const team1 = document.getElementById('cus-t1-name').value.trim();
+      const logo1 = document.getElementById('cus-t1-logo').value.trim();
+      const team2 = document.getElementById('cus-t2-name').value.trim();
+      const logo2 = document.getElementById('cus-t2-logo').value.trim();
+      const league = document.getElementById('cus-league').value.trim();
+      const round = document.getElementById('cus-round').value.trim();
+      const time = document.getElementById('cus-time').value;
+      const url = document.getElementById('cus-stream').value.trim();
+
+      if (!team1 || !team2 || !time) {
+        alert('Teams and Kickoff time are required.');
+        return;
+      }
+
+      const utcTime = new Date(time).toISOString();
+      const matchEnd = new Date(new Date(time).getTime() + 2 * 60 * 60 * 1000).toISOString();
+
+      const newMatch = {
+        id: `custom-${Date.now()}`,
+        team1Name: team1,
+        team1Logo: logo1 || 'https://4.bp.blogspot.com/-uCjYgVFIh70/VuOLn-mL7PI/AAAAAAAADUs/Kcu9wJbv790hIo83rI_s7lLW3zkLY01EA/s100/avatar.png',
+        team2Name: team2,
+        team2Logo: logo2 || 'https://4.bp.blogspot.com/-uCjYgVFIh70/VuOLn-mL7PI/AAAAAAAADUs/Kcu9wJbv790hIo83rI_s7lLW3zkLY01EA/s100/avatar.png',
+        startTime: utcTime,
+        endTime: matchEnd,
+        league: league || 'Unknown Tournament',
+        round: round || 'Regular Match',
+        url: url || '#',
+        platform: 'LIVE',
+        timezone: 'UTC'
+      };
+
+      customMatchesList.push(newMatch);
+      renderCustomMatches();
+
+      document.getElementById('cus-t1-name').value = '';
+      document.getElementById('cus-t1-logo').value = '';
+      document.getElementById('cus-t2-name').value = '';
+      document.getElementById('cus-t2-logo').value = '';
+      document.getElementById('cus-league').value = '';
+      document.getElementById('cus-round').value = '';
+      document.getElementById('cus-time').value = '';
+      document.getElementById('cus-stream').value = '';
+    }
+
+    function deleteCustomMatch(idx) {
+      customMatchesList.splice(idx, 1);
+      renderCustomMatches();
+    }
+
+    function addRedirect() {
+      const matchId = document.getElementById('red-id').value.trim();
+      const redirectUrl = document.getElementById('red-url').value.trim();
+
+      if (!matchId || !redirectUrl) return;
+
+      redirectsMap[matchId] = redirectUrl;
+      renderRedirects();
+
+      document.getElementById('red-id').value = '';
+      document.getElementById('red-url').value = '';
+    }
+
+    function deleteRedirect(key) {
+      delete redirectsMap[key];
+      renderRedirects();
+    }
+
+    function showNotification(type, message) {
+      const el = document.getElementById(`alert-${type}`);
+      if (el) {
+        el.textContent = message;
+        el.style.display = 'block';
+        setTimeout(() => {
+          el.style.display = 'none';
+        }, 4000);
+      }
+    }
+  </script>
+</body>
+</html>
