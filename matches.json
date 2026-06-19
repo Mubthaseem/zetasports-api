@@ -1,0 +1,30 @@
+{
+    "success": false,
+    "error": "No matches found from any competition. Errors: ",
+    "matches": [],
+    "grouped_matches": {
+        "live": [],
+        "finished_today": [],
+        "today": [],
+        "tomorrow": [],
+        "upcoming": [],
+        "finished_recent": []
+    },
+    "stats": {
+        "total_matches": 0,
+        "live_matches": 0,
+        "today_matches": 0,
+        "tomorrow_matches": 0,
+        "finished_today": 0,
+        "finished_recent": 0
+    },
+    "query_info": {
+        "competition": "ALL",
+        "competition_name": "Unknown Competition",
+        "timezone": "Asia\/Kolkata",
+        "from_cache": false,
+        "current_time": "2026-06-17 12:50:04"
+    },
+    "generated_at": "2026-06-17 12:50:04 UTC",
+    "timestamp": "2026-06-17 12:50:04"
+}
