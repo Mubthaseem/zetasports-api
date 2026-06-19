@@ -1,14 +1,14 @@
 [
   {
-    "id": "custom-1781905836374",
+    "id": "custom-1781906280358",
     "team1Name": "Scotland",
     "team1Logo": "https://images.fotmob.com/image_resources/logo/teamlogo/8498_small.png",
     "team2Name": "Morocco",
     "team2Logo": "https://images.fotmob.com/image_resources/logo/teamlogo/6262_small.png",
-    "startTime": "2026-06-19T04:30:00.000Z",
-    "endTime": "2026-06-19T06:30:00.000Z",
+    "startTime": "2026-06-19T22:00:00.000Z",
+    "endTime": "2026-06-20T00:00:00.000Z",
     "league": "FIFA World Cup",
-    "round": "Round 2",
+    "round": "(Round 2)",
     "url": "https://zeta.scoopnonstop.com/2026/06/scotland-vs-morocco.html",
     "platform": "LIVE",
     "timezone": "UTC"
