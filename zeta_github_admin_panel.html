@@ -915,14 +915,18 @@
       }).join('');
     }
 
-    // Push Selected Matches & Selected Cricket Matches to GitHub
+    // Push Selected Matches & Selected Cricket Matches to GitHub sequentially
     async function pushSelectedMatches() {
-      showNotification('success', 'Pushing selected matches configurations...');
+      showNotification('success', 'Pushing football matches...');
       try {
-        await Promise.all([
-          pushFile('selected-matches.json', { matches: selectedMatchesList }),
-          pushFile('selected-cricket-matches.json', { matches: selectedCricketMatchesList })
-        ]);
+        await pushFile('selected-matches.json', { matches: selectedMatchesList });
+        
+        // Wait a tiny moment for GitHub to update the branch ref
+        await new Promise(r => setTimeout(r, 800));
+        
+        showNotification('success', 'Pushing cricket matches...');
+        await pushFile('selected-cricket-matches.json', { matches: selectedCricketMatchesList });
+        
         showNotification('success', 'Successfully pushed all selected matches to GitHub!');
       } catch (e) {
         showNotification('error', 'Pushing selected files failed: ' + e.message);
@@ -951,7 +955,20 @@
       }
 
       const url = `https://api.github.com/repos/${config.owner}/${config.repo}/contents/${filename}`;
-      const sha = localStorage.getItem(`sha_${filename}`) || null;
+      
+      // Fetch the latest file metadata from GitHub right before writing to get the exact current blob SHA
+      let sha = null;
+      try {
+        const getRes = await fetch(url + `?_t=${Date.now()}`, {
+          headers: { "Authorization": `token ${config.token}` }
+        });
+        if (getRes.ok) {
+          const fileData = await getRes.json();
+          sha = fileData.sha;
+        }
+      } catch (err) {
+        console.warn(`Failed to fetch latest SHA for ${filename}:`, err.message);
+      }
 
       const body = {
         message: `Admin Panel: Update ${filename}`,
