@@ -11,6 +11,8 @@ on:
 jobs:
   fetch-and-cache:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     # Allow up to 10 minutes so the loop completes fully
     timeout-minutes: 10
 
