@@ -4,9 +4,21 @@
       "id": 760453,
       "streamUrl": "https://zeta.scoopnonstop.com/2026/06/spain-vs-saudi-arabia.html"
     },
-    760451,
-    760450,
-    760452,
-    760456
+    {
+      "id": 760451,
+      "streamUrl": "https://www.zetasports.online/wpc"
+    },
+    {
+      "id": 760450,
+      "streamUrl": "https://www.zetasports.online/wpc"
+    },
+    {
+      "id": 760452,
+      "streamUrl": "https://www.zetasports.online/wpc"
+    },
+    {
+      "id": 760456,
+      "streamUrl": "https://www.zetasports.online/wpc"
+    }
   ]
 }
