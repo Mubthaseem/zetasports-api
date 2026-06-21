@@ -21,6 +21,7 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
         with:
+          ref: main
           token: ${{ secrets.GITHUB_TOKEN }}
 
       # ── 2. Configure git once ────────────────────────────────
@@ -51,35 +52,35 @@ jobs:
 
             if [ "$HTTP_STATUS" = "200" ]; then
               # Inject fetch metadata so the widget can show data freshness
-              python3 - <<'PYEOF'
-import json, datetime, sys
+              python3 -c "import sys, textwrap; exec(textwrap.dedent(sys.stdin.read()))" <<'PYEOF'
+              import json, datetime, sys
 
-with open('live-feed.json', 'r') as f:
-    data = json.load(f)
+              with open('live-feed.json', 'r') as f:
+                  data = json.load(f)
 
-data['_proxy_status'] = 'fresh'
-data['_fetched_at']   = datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
+              data['_proxy_status'] = 'fresh'
+              data['_fetched_at']   = datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
 
-with open('live-feed.json', 'w') as f:
-    json.dump(data, f, separators=(',', ':'))   # compact — faster to serve
+              with open('live-feed.json', 'w') as f:
+                  json.dump(data, f, separators=(',', ':'))   # compact — faster to serve
 
-print("Stamped _fetched_at:", data['_fetched_at'])
-PYEOF
+              print("Stamped _fetched_at:", data['_fetched_at'])
+              PYEOF
             else
               echo "Fetch failed (HTTP $HTTP_STATUS) — keeping previous data, marking stale"
-              python3 - <<'PYEOF'
-import json, datetime
+              python3 -c "import sys, textwrap; exec(textwrap.dedent(sys.stdin.read()))" <<'PYEOF'
+              import json, datetime
 
-try:
-    with open('live-feed.json', 'r') as f:
-        data = json.load(f)
-    data['_proxy_status'] = 'stale'
-    data['_fetched_at']   = datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
-    with open('live-feed.json', 'w') as f:
-        json.dump(data, f, separators=(',', ':'))
-except Exception as e:
-    print("Could not update stale flag:", e)
-PYEOF
+              try:
+                  with open('live-feed.json', 'r') as f:
+                      data = json.load(f)
+                  data['_proxy_status'] = 'stale'
+                  data['_fetched_at']   = datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
+                  with open('live-feed.json', 'w') as f:
+                      json.dump(data, f, separators=(',', ':'))
+              except Exception as e:
+                  print("Could not update stale flag:", e)
+              PYEOF
             fi
 
             # ── Commit only if content changed ──────────────────
@@ -88,7 +89,8 @@ PYEOF
               echo "No change — skipping commit"
             else
               git commit -m "live: update feed [skip ci] $(date -u '+%H:%M:%S')"
-              git push
+              git pull origin main --rebase
+              git push origin HEAD:main
               echo "Pushed!"
             fi
 
